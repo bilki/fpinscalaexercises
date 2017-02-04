@@ -21,8 +21,8 @@ object Parallels {
 
     def lazyUnit[A](a: => A): Par[A] = fork(unit(a))
 
-    //    def asyncF[A,B](f: A => B): A => Par[B] = es =>
-    //      fork(lazyUnit(f))
+    // 7.4
+    def asyncF[A,B](f: A => B): A => Par[B] = a => fork(lazyUnit(f(a)))
 
     def run[A](s: ExecutorService)(c: Par[A]): Future[A] = c(s)
 
@@ -32,15 +32,34 @@ object Parallels {
       UnitFuture(f(pares.get, pbres.get))
     }
 
+    def map[A, B](pa: Par[A])(f: A => B): Par[B] = {
+      map2(pa, unit())((a, _) => f(a))
+    }
+
     def fork[A](a: => Par[A]): Par[A] = es =>
       es.submit(new Callable[A] {
         def call = a(es).get
       })
+
+    // 7.5
+    def sequence[A](ps: List[Par[A]]): Par[List[A]] =
+      ps.reverse.foldLeft(unit(List.empty[A]))((comps, nextComp) => map2(comps, nextComp)((l, elem) => elem :: l))
+
+    def parMap[A, B](ps: List[A])(f: A => B): Par[List[B]] = {
+      val fbs: List[Par[B]] = ps.map(asyncF(f))
+      sequence(fbs)
+    }
+
+    // 7.6
+    def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = {
+      val valueExists = parMap(as)(a => if(f(a)) Nil else List(a))
+      map(valueExists)(_.flatten)
+    }
   }
 }
 
 object ParallelsApp extends App {
-  import Parallels._
+  import Parallels.Par._
 
   override def main(args: Array[String]) = {
   }
