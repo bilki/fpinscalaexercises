@@ -1,9 +1,7 @@
 package chapter7
 
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.Callable
+import java.time.LocalDateTime
+import java.util.concurrent._
 
 object Parallels {
 
@@ -22,7 +20,7 @@ object Parallels {
     def lazyUnit[A](a: => A): Par[A] = fork(unit(a))
 
     // 7.4
-    def asyncF[A,B](f: A => B): A => Par[B] = a => fork(lazyUnit(f(a)))
+    def asyncF[A,B](f: A => B): A => Par[B] = a => lazyUnit(f(a))
 
     def run[A](s: ExecutorService)(c: Par[A]): Future[A] = c(s)
 
@@ -41,9 +39,11 @@ object Parallels {
         def call = a(es).get
       })
 
+    def delay[A](a: => Par[A]): Par[A] = es => a(es)
+
     // 7.5
     def sequence[A](ps: List[Par[A]]): Par[List[A]] =
-      ps.reverse.foldLeft(unit(List.empty[A]))((comps, nextComp) => map2(comps, nextComp)((l, elem) => elem :: l))
+      ps.reverse.foldLeft(unit(List.empty[A]))((comps, nextComp) => map2(nextComp, comps)((comp, l) => comp :: l))
 
     def parMap[A, B](ps: List[A])(f: A => B): Par[List[B]] = {
       val fbs: List[Par[B]] = ps.map(asyncF(f))
@@ -62,5 +62,26 @@ object ParallelsApp extends App {
   import Parallels.Par._
 
   override def main(args: Array[String]) = {
+    val threadPool = Executors.newFixedThreadPool(16)
+
+    def waitAndSum(x: Int): Int = {
+      Thread.sleep(2000)
+      x + 1
+    }
+
+    val futureTwo = asyncF(waitAndSum)(1)
+    val futureThree = asyncF(waitAndSum)(2)
+
+    val nums = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    val futureLessThanSix = parFilter(nums) { n => Thread.sleep(1000); n < 6 }
+    println(LocalDateTime.now())
+    println(run(threadPool)(futureLessThanSix).get)
+    println(LocalDateTime.now())
+
+    println(LocalDateTime.now())
+    println(run(threadPool)(sequence(List(futureTwo, futureThree, futureTwo))).get)
+    println(LocalDateTime.now())
+
+    threadPool.shutdown
   }
 }
