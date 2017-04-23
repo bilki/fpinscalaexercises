@@ -3,6 +3,7 @@ package chapter6
 import scala.annotation.tailrec
 
 object Randoms {
+
   trait RNG {
     def nextInt: (Int, RNG)
   }
@@ -129,24 +130,25 @@ object Randoms {
     def fmap2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
       flatMap(ra)(a => map(rb)(b => f(a, b)))
   }
+
 }
 
 object RamdomsApp extends App {
+
   import Randoms._
 
-  override def main(args: Array[String]) = {
-    println(SimpleRNG.ints(3)(SimpleRNG(42)))
-    println(SimpleRNG.seqints(3)(SimpleRNG(42)))
+  println(SimpleRNG.ints(3)(SimpleRNG(42)))
+  println(SimpleRNG.seqints(3)(SimpleRNG(42)))
 
-    println(SimpleRNG.nonNegativeLessThan(Int.MaxValue)(SimpleRNG(5)))
-    println(SimpleRNG.nnlThanFlatMapped(Int.MaxValue)(SimpleRNG(5)))
+  println(SimpleRNG.nonNegativeLessThan(Int.MaxValue)(SimpleRNG(5)))
+  println(SimpleRNG.nnlThanFlatMapped(Int.MaxValue)(SimpleRNG(5)))
 
-    println(map(int)(i => i + 1)(SimpleRNG(85)))
-    println(SimpleRNG.fmap(int)(i => i + 1)(SimpleRNG(85)))
+  println(map(int)(i => i + 1)(SimpleRNG(85)))
+  println(SimpleRNG.fmap(int)(i => i + 1)(SimpleRNG(85)))
 
-    def rollDie: Rand[Int] = map(SimpleRNG.nonNegativeLessThan(6))(_ + 1)
-    val zero = rollDie(SimpleRNG(5))._1
+  def rollDie: Rand[Int] = map(SimpleRNG.nonNegativeLessThan(6))(_ + 1)
 
-    println(zero)
-  }
+  val zero = rollDie(SimpleRNG(5))._1
+
+  println(zero)
 }

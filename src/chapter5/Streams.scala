@@ -3,6 +3,7 @@ package chapter5
 import scala.annotation.tailrec
 
 object Streams {
+
   sealed trait Stream[+A] {
     def headOption: Option[A] = this match {
       case Empty      => None
@@ -143,9 +144,11 @@ object Streams {
 
     def isEmpty: Boolean
   }
+
   case object Empty extends Stream[Nothing] {
     override def isEmpty: Boolean = true
   }
+
   case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A] {
     override def isEmpty: Boolean = false
   }
@@ -156,6 +159,7 @@ object Streams {
       lazy val tail = tl
       Cons(() => head, () => tail)
     }
+
     def empty[A]: Stream[A] = Empty
 
     def apply[A](as: A*): Stream[A] =
@@ -171,6 +175,7 @@ object Streams {
     def fibs: Stream[Int] = {
       def fibs0(v1: Int, v2: Int): Stream[Int] =
         cons(v1, fibs0(v2, v1 + v2))
+
       fibs0(0, 1)
     }
 
@@ -190,40 +195,40 @@ object Streams {
     def unConstant[A](a: A): Stream[A] =
       unfold(a)(s => Some((a, a)))
   }
+
 }
 
 object StreamsApp extends App {
+
   import Streams._
 
-  override def main(args: Array[String]) = {
-    lazy val ones: Stream[Int] = Stream.cons(1, ones)
+  lazy val ones: Stream[Int] = Stream.cons(1, ones)
 
-    // 5.12
-    lazy val unOnes: Stream[Int] = Stream.unConstant(1)
+  // 5.12
+  lazy val unOnes: Stream[Int] = Stream.unConstant(1)
 
-    val s1 = Stream.from(0)
-    val s2 = Stream.from(1000)
+  val s1 = Stream.from(0)
+  val s2 = Stream.from(1000)
 
-    println(unOnes.take(5).toList)
+  println(unOnes.take(5).toList)
 
-    println(Stream.from(1).unMap(_ * 2).take(5).toList)
+  println(Stream.from(1).unMap(_ * 2).take(5).toList)
 
-    println(Stream.from(20).unTake(5).toList)
+  println(Stream.from(20).unTake(5).toList)
 
-    println(Stream.from(30).unTakeWhile(_ < 36).toList)
+  println(Stream.from(30).unTakeWhile(_ < 36).toList)
 
-    println(Stream.fibs.take(7).toList)
+  println(Stream.fibs.take(7).toList)
 
-    println(Stream.unFibs.take(7).toList)
+  println(Stream.unFibs.take(7).toList)
 
-    println(Stream.unFrom(2).take(5).toList)
+  println(Stream.unFrom(2).take(5).toList)
 
-    println(Stream.unConstant(3).take(2).toList)
+  println(Stream.unConstant(3).take(2).toList)
 
-    println(s1.unZipWith(s2)(_ + _).take(5).toList)
+  println(s1.unZipWith(s2)(_ + _).take(5).toList)
 
-    println(s2.unZipAll(s1.take(5)).take(10).toList)
+  println(s2.unZipAll(s1.take(5)).take(10).toList)
 
-    println(Stream.unFrom(1).take(3).tails.map(s => s.toList).toList)
-  }
+  println(Stream.unFrom(1).take(3).tails.map(s => s.toList).toList)
 }

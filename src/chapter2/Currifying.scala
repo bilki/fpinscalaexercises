@@ -7,13 +7,9 @@ object Currifying extends App {
 
   def uncurry[A, B, C](f: A => B => C): (A, B) => C = (a: A, b: B) => f(a)(b)
 
-  override def main(args: Array[String]) = {
+  def sum(a: Int, b: Int): Int = a + b
 
-    def sum(a: Int, b: Int): Int = a + b
+  println("curryfied sum: " + curry(sum)(2)(3))
 
-    println("curryfied sum: " + curry(sum)(2)(3))
-
-    println("uncurryfied sum: " + uncurry(curry(sum))(2, 3))
-
-  }
+  println("uncurryfied sum: " + uncurry(curry(sum))(2, 3))
 }

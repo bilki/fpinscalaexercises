@@ -4,6 +4,7 @@ import chapter6.Randoms.RNG
 import chapter6.Randoms.SimpleRNG
 
 object States {
+
   case class State[S, +A](run: S => (A, S)) {
     def flatMap[B](g: A => State[S, B]): State[S, B] = State(state => {
       val (elem, nextState) = run(state)
@@ -25,7 +26,7 @@ object States {
 
     def get[S]: State[S, S] = State(s => (s, s))
 
-    def set[S](s: S): State[S, Unit] = State(_ => ({}, s))
+    def set[S](s: S): State[S, Unit] = State(_ => ( {}, s))
 
     def modify[S](f: S => S): State[S, Unit] = {
       val state = get[S]
@@ -34,7 +35,9 @@ object States {
   }
 
   sealed trait Input
+
   case object Coin extends Input
+
   case object Turn extends Input
 
   case class Machine(locked: Boolean, candies: Int, coins: Int)
@@ -52,6 +55,7 @@ object States {
 }
 
 object StatesApp extends App {
+
   import States._
 
   type Rand[A] = State[RNG, A]

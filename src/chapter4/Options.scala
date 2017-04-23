@@ -3,6 +3,7 @@ package chapter4
 import scala.annotation.tailrec
 
 object Options {
+
   sealed trait Option[+A] {
     // 4.1
     def map[B](f: A => B): Option[B] = this match {
@@ -21,7 +22,9 @@ object Options {
 
     def filter(f: A => Boolean): Option[A] = flatMap(v => if (f(v)) Some(v) else None)
   }
+
   case class Some[+A](get: A) extends Option[A]
+
   case object None extends Option[Nothing]
 
   // 4.2
@@ -38,6 +41,7 @@ object Options {
   def lift[A, B](f: A => B): Option[A] => Option[B] = _ map f
 
   import chapter2.Currifying._
+
   // 4.3
   def map2lifted[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] =
     lift(curry(f))(a).flatMap(subf => lift(subf)(b))
@@ -72,17 +76,16 @@ object Options {
 }
 
 object OptionsApp extends App {
+
   import Options._
 
-  override def main(args: Array[String]) = {
-    val intList = List(0, 1, 2, 3)
+  val intList = List(0, 1, 2, 3)
 
-    val optList = List(Some(1), Some(-7), Some(3))
+  val optList = List(Some(1), Some(-7), Some(3))
 
-    def toIntOpt(i: Int): Option[Int] = if (i >= 0) Some(i * 2) else None
+  def toIntOpt(i: Int): Option[Int] = if (i >= 0) Some(i * 2) else None
 
-    println(traverse(intList)(toIntOpt))
+  println(traverse(intList)(toIntOpt))
 
-    println(trasequence(optList))
-  }
+  println(trasequence(optList))
 }

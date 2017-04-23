@@ -12,15 +12,18 @@ object Parallels {
 
     private case class UnitFuture[A](get: A) extends Future[A] {
       def isDone = true
+
       def get(timeout: Long, units: TimeUnit) = get
+
       def isCancelled = false
+
       def cancel(evenIfRunning: Boolean): Boolean = false
     }
 
     def lazyUnit[A](a: => A): Par[A] = fork(unit(a))
 
     // 7.4
-    def asyncF[A,B](f: A => B): A => Par[B] = a => lazyUnit(f(a))
+    def asyncF[A, B](f: A => B): A => Par[B] = a => lazyUnit(f(a))
 
     def run[A](s: ExecutorService)(c: Par[A]): Future[A] = c(s)
 
@@ -31,7 +34,7 @@ object Parallels {
     }
 
     def map[A, B](pa: Par[A])(f: A => B): Par[B] = {
-      map2(pa, unit())((a, _) => f(a))
+      map2(pa, unit(()))((a, _) => f(a))
     }
 
     def fork[A](a: => Par[A]): Par[A] = es =>
@@ -52,36 +55,36 @@ object Parallels {
 
     // 7.6
     def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = {
-      val valueExists = parMap(as)(a => if(f(a)) Nil else List(a))
+      val valueExists = parMap(as)(a => if (f(a)) Nil else List(a))
       map(valueExists)(_.flatten)
     }
   }
+
 }
 
 object ParallelsApp extends App {
+
   import Parallels.Par._
 
-  override def main(args: Array[String]) = {
-    val threadPool = Executors.newFixedThreadPool(16)
+  val threadPool = Executors.newFixedThreadPool(16)
 
-    def waitAndSum(x: Int): Int = {
-      Thread.sleep(2000)
-      x + 1
-    }
-
-    val futureTwo = asyncF(waitAndSum)(1)
-    val futureThree = asyncF(waitAndSum)(2)
-
-    val nums = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-    val futureLessThanSix = parFilter(nums) { n => Thread.sleep(1000); n < 6 }
-    println(LocalDateTime.now())
-    println(run(threadPool)(futureLessThanSix).get)
-    println(LocalDateTime.now())
-
-    println(LocalDateTime.now())
-    println(run(threadPool)(sequence(List(futureTwo, futureThree, futureTwo))).get)
-    println(LocalDateTime.now())
-
-    threadPool.shutdown
+  def waitAndSum(x: Int): Int = {
+    Thread.sleep(2000)
+    x + 1
   }
+
+  val futureTwo = asyncF(waitAndSum)(1)
+  val futureThree = asyncF(waitAndSum)(2)
+
+  val nums = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+  val futureLessThanSix = parFilter(nums) { n => Thread.sleep(1000); n < 6 }
+  println(LocalDateTime.now())
+  println(run(threadPool)(futureLessThanSix).get)
+  println(LocalDateTime.now())
+
+  println(LocalDateTime.now())
+  println(run(threadPool)(sequence(List(futureTwo, futureThree, futureTwo))).get)
+  println(LocalDateTime.now())
+
+  threadPool.shutdown
 }

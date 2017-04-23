@@ -2,10 +2,8 @@ package chapter4
 
 import scala.annotation.tailrec
 
-/**
- * @author rsemarcos
- */
 object Eithers {
+
   sealed trait Either[+E, +A] {
     // 4.6
     def map[B](f: A => B): Either[E, B] = this match {
@@ -31,7 +29,9 @@ object Eithers {
         f(aa, bb)
       }
   }
+
   case class Left[+E](value: E) extends Either[E, Nothing]
+
   case class Right[+A](value: A) extends Either[Nothing, A]
 
   // 4.7
@@ -46,29 +46,28 @@ object Eithers {
 
     traverse0(Right(Nil), as.reverse)
   }
-  
+
   // 4.8
   // Change the mkName to return a list of errors
 }
 
 object EithersApp extends App {
+
   import Eithers._
 
-  override def main(args: Array[String]) = {
-    val eitherList = List(1, 5, -2)
+  val eitherList = List(1, 5, -2)
 
-    def intToEither(i: Int): Either[String, Int] =
-      if (i == 5)
-        Left("This is five")
-      else if (i >= 0)
-        Right(i + 2)
-      else
-        Left("Less than zero")
+  def intToEither(i: Int): Either[String, Int] =
+    if (i == 5)
+      Left("This is five")
+    else if (i >= 0)
+      Right(i + 2)
+    else
+      Left("Less than zero")
 
-    println(traverse(eitherList)(intToEither))
-    
-    val s = (1 to 500000).toStream
-    
-    println("25k: " + s.take(200000))
-  }
+  println(traverse(eitherList)(intToEither))
+
+  val s = (1 to 500000).toStream
+
+  println("25k: " + s.take(200000))
 }

@@ -5,8 +5,11 @@ import scala.annotation.tailrec
 object Trees extends App {
 
   object Tree {
+
     sealed trait Tree[+A]
+
     case class Leaf[A](value: A) extends Tree[A]
+
     case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
 
     // 3.25
@@ -52,17 +55,15 @@ object Trees extends App {
     }
   }
 
-  override def main(args: Array[String]) = {
-    import Tree._
+  import Tree._
 
-    println("nodes t: " + count(Branch(Leaf(2), Branch(Leaf(7), Leaf(9)))))
-    println("max t: " + max(Branch(Leaf(2), Branch(Branch(Leaf(7), Leaf(1)), Leaf(0)))))
-    println("depth t: " + depth(Branch(Branch(Leaf(2), Branch(Leaf(5), Leaf(3))), Branch(Branch(Leaf(7), Leaf(1)), Leaf(0)))))
-    println("depth t2: " + depth(Leaf(2)))
-    println("depth t3: " + depth(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))))
-    println("depth t4: " + depth(Branch(Leaf(1), Leaf(2))))
-    println("depth t5: " + depth(Branch(Leaf(1), Branch(Branch(Leaf(8), Leaf(9)), Branch(Leaf(3), Branch(Leaf(4), Leaf(5)))))))
-    println("depth t6: " + depth(Branch(Branch(Branch(Branch(Leaf(4), Leaf(3)), Leaf(2)), Leaf(1)), Leaf(0))))
-    println(map(Branch(Branch(Branch(Branch(Leaf(4), Leaf(3)), Leaf(2)), Leaf(1)), Leaf(0)))(_ + 1))
-  }
+  println("nodes t: " + count(Branch(Leaf(2), Branch(Leaf(7), Leaf(9)))))
+  println("max t: " + max(Branch(Leaf(2), Branch(Branch(Leaf(7), Leaf(1)), Leaf(0)))))
+  println("depth t: " + depth(Branch(Branch(Leaf(2), Branch(Leaf(5), Leaf(3))), Branch(Branch(Leaf(7), Leaf(1)), Leaf(0)))))
+  println("depth t2: " + depth(Leaf(2)))
+  println("depth t3: " + depth(Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))))
+  println("depth t4: " + depth(Branch(Leaf(1), Leaf(2))))
+  println("depth t5: " + depth(Branch(Leaf(1), Branch(Branch(Leaf(8), Leaf(9)), Branch(Leaf(3), Branch(Leaf(4), Leaf(5)))))))
+  println("depth t6: " + depth(Branch(Branch(Branch(Branch(Leaf(4), Leaf(3)), Leaf(2)), Leaf(1)), Leaf(0))))
+  println(map(Branch(Branch(Branch(Branch(Leaf(4), Leaf(3)), Leaf(2)), Leaf(1)), Leaf(0)))(_ + 1))
 }
